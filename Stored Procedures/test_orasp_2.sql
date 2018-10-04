@@ -7,8 +7,8 @@ BEGIN
     -- Do other stuff here
     OPEN ref_cursor FOR
         SELECT *
-          FROM soe.customers
-         WHERE customer_id = id;
+          FROM sample_data
+         WHERE id = id;
 END test_orasp_2;
 /
 
