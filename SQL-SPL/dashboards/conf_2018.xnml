@@ -1,0 +1,150 @@
+<dashboard>
+  <label>.conf 2018</label>
+  <row>
+    <panel>
+      <title>Sales by victories</title>
+      <chart>
+        <search>
+          <query>| dbxquery connection=mysql query="
+    SELECT sum(gu.victory) as victories, session_id
+    FROM conf2018.user u
+      JOIN conf2018.game_user gu ON gu.user_id = u.id
+      JOIN conf2018.game g ON g.id = gu.game_id
+      JOIN conf2018.user_session us ON us.user_id = u.id
+      GROUP BY session_id"
+| join session_id
+    [
+      search source="tutorialdata.zip:*" sourcetype=access_combined_wcookie JSESSIONID action=addtocart productId
+      | rename JSESSIONID as session_id
+    ]
+| stats count by victories
+| sort + victories</query>
+          <earliest>0</earliest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Missing data</title>
+      <table>
+        <search>
+          <query>source="tutorialdata.zip:*" sourcetype=access_combined_wcookie action=purchase productId
+| dedup JSESSIONID
+| fields JSESSIONID
+| rename JSESSIONID as temp_table
+| eval temp_table="'".temp_table."'"
+| mvcombine delim="AS ID UNION SELECT " temp_table
+| nomv temp_table
+| eval temp_table="SELECT ".temp_table
+| eval search_query="
+    SELECT * FROM (".temp_table.") ids
+    WHERE NOT EXISTS (
+        SELECT session_id FROM conf2018.bad_user_session us
+        WHERE us.session_id = ids.id)"
+| fields search_query
+| map search="dbxquery connection=mysql query=$$search_query$$"</query>
+          <earliest>1534896000</earliest>
+          <latest>1535068800</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Sales by victories and products</title>
+      <chart>
+        <search>
+          <query>| dbxquery connection=mysql query="
+    SELECT sum(gu.victory) as victories, session_id
+    FROM conf2018.user u
+      JOIN conf2018.game_user gu ON gu.user_id = u.id
+      JOIN conf2018.game g ON g.id = gu.game_id
+      JOIN conf2018.user_session us ON us.user_id = u.id
+      GROUP BY session_id"
+| join session_id
+    [
+      search source="tutorialdata.zip:*" sourcetype=access_combined_wcookie JSESSIONID action=addtocart productId
+      | rename JSESSIONID as session_id
+    ]
+| stats count by victories, productId
+| sort + victories</query>
+          <earliest>0</earliest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">collapsed</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">none</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="trellis.enabled">1</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trellis.splitBy">productId</option>
+      </chart>
+    </panel>
+  </row>
+</dashboard>
